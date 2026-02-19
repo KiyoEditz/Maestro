@@ -14,7 +14,11 @@ A MIDI player utility optimized for performance and flexibility.
 
 ## 🚀 Installation 
 
-Gunakan Python 3.10 untuk stabilitas terbaik:
+<img src="https://raw.githubusercontent.com/KiyoEditz/Maestro/refs/heads/main/Screenshot_20260220-061426.jpg" />
+
+* make sure usb mode is in midi input mode.
+
+Use Python 3.10 for best stability:
 
 ```bash
 # Install dependencies
@@ -24,7 +28,6 @@ pip install mido pygame
 py -3.10 runG.py
 ```
 ## NOTES
-
 * run.py: This is the single version. It does not support complex MIDI files.
 * run1.py: This is the multi version. It supports complex MIDI files and is simple to use if you prefer terminal commands.
 * run2.py: Same as run1.py, but includes speed adjustment features.
