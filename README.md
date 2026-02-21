@@ -28,6 +28,7 @@ pip install mido pygame
 py -3.10 runG.py
 ```
 ## NOTES
+* there is have some limiter with how loud(Velocity) you can use. the limit is aroud 0-127 Velocity. and more Velocity means more noise. it's depend from your usb quality.
 * run.py: This is the single version. It does not support complex MIDI files.
 * run1.py: This is the multi version. It supports complex MIDI files and is simple to use if you prefer terminal commands.
 * run2.py: Same as run1.py, but includes speed adjustment features.
