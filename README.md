@@ -33,3 +33,8 @@ py -3.10 runG.py
 * run2.py: Same as run1.py, but includes speed adjustment features.
 * run3.py: Same as run2.py, but includes both speed and volume adjustment.
 * runG.py: Same as run3.py, but features a GUI interface for easier use.
+
+## EROR?
+* portmidi: host error? try plug in and plug out your usb. 
+* port not detected? are you sure your usb is in midi mode? you have double check it.
+* your phonr explode? i don't care. not my problem.
