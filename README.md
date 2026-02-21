@@ -25,7 +25,7 @@ Use Python 3.10 for best stability:
 pip install mido pygame
 
 # Run the recommended version (GUI)
-py -3.10 runG.py
+py -3.10 runG1.py
 ```
 ## NOTES
 * there is have some limiter with how loud(Velocity) you can use. the limit is aroud 0-127 Velocity. and more Velocity means more noise. it's depend from your usb quality.
@@ -34,6 +34,7 @@ py -3.10 runG.py
 * run2.py: Same as run1.py, but includes speed adjustment features.
 * run3.py: Same as run2.py, but includes both speed and volume adjustment.
 * runG.py: Same as run3.py, but features a GUI interface for easier use.
+* runG1.py: Same as runG.py, but more optimize. 
 
 ## EROR?
 * portmidi: host error? try plug in and plug out your usb. 
