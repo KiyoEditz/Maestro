@@ -10,7 +10,7 @@ from tkinter import ttk, filedialog, messagebox
 class MidiPlayerApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Python MIDI Player")
+        self.root.title("Maestro Python MIDI Player")
         self.root.geometry("450x350")
         self.root.resizable(False, False)
 

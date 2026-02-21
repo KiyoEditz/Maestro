@@ -3,6 +3,8 @@ import pygame
 import pygame.midi
 import time
 import os
+import sys
+import ctypes
 import threading
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
@@ -10,15 +12,18 @@ from tkinter import ttk, filedialog, messagebox
 class MidiPlayerApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Pro Python MIDI Player")
+        self.root.title("Maestro Python MIDI Player Pro")
         self.root.geometry("500x480")
         self.root.resizable(False, False)
 
+        # --- OPTIMISASI CPU (HIGH PRIORITY) ---
+        self.set_high_priority()
+
         # --- PENGATURAN TEMA (DARK MODE) ---
-        self.bg_color = "#2E3440"       # Warna background utama (Gelap)
-        self.fg_color = "#D8DEE9"       # Warna teks (Terang)
-        self.accent_color = "#88C0D0"   # Warna aksen (Biru muda)
-        self.frame_bg = "#3B4252"       # Warna kotak frame
+        self.bg_color = "#2E3440"       
+        self.fg_color = "#D8DEE9"       
+        self.accent_color = "#88C0D0"   
+        self.frame_bg = "#3B4252"       
         
         self.root.configure(bg=self.bg_color)
         self.setup_theme()
@@ -37,21 +42,24 @@ class MidiPlayerApp:
         # Bangun Antarmuka (UI)
         self.build_ui()
 
-    def setup_theme(self):
-        """Mengatur gaya kustom untuk widget (Tombol, Label, Progressbar)"""
-        style = ttk.Style()
-        style.theme_use('clam') # Gunakan base theme yang mudah dimodifikasi
+    def set_high_priority(self):
+        """Memaksa Windows memberikan prioritas CPU tertinggi ke program ini"""
+        try:
+            if sys.platform == 'win32':
+                # 0x00000080 adalah kode Windows untuk HIGH_PRIORITY_CLASS
+                ctypes.windll.kernel32.SetPriorityClass(ctypes.windll.kernel32.GetCurrentProcess(), 0x00000080)
+                print("Optimisasi: CPU High Priority berhasil diaktifkan.")
+        except Exception as e:
+            print(f"Gagal mengatur prioritas CPU: {e}")
 
-        # Konfigurasi Label
+    def setup_theme(self):
+        style = ttk.Style()
+        style.theme_use('clam')
         style.configure("TLabel", background=self.bg_color, foreground=self.fg_color, font=("Segoe UI", 10))
         style.configure("Frame.TLabel", background=self.frame_bg, foreground=self.fg_color)
-        
-        # Konfigurasi Tombol
         style.configure("TButton", background=self.frame_bg, foreground=self.fg_color, 
                         font=("Segoe UI", 10, "bold"), borderwidth=0, padding=5)
         style.map("TButton", background=[("active", self.accent_color), ("disabled", "#4C566A")])
-
-        # Konfigurasi Progressbar
         style.configure("TProgressbar", thickness=15, troughcolor=self.frame_bg, 
                         background=self.accent_color, bordercolor=self.bg_color)
 
@@ -66,17 +74,14 @@ class MidiPlayerApp:
         return ports
 
     def format_time(self, seconds):
-        """Mengubah detik menjadi format MM:SS"""
         mins = int(seconds // 60)
         secs = int(seconds % 60)
         return f"{mins:02d}:{secs:02d}"
 
     def build_ui(self):
-        # Frame utama untuk memberi margin
         main_frame = tk.Frame(self.root, bg=self.bg_color)
         main_frame.pack(padx=20, pady=15, fill="both", expand=True)
 
-        # 1. Pilih Port
         ttk.Label(main_frame, text="1. Pilih Port MIDI Output:").pack(anchor="w", pady=(0, 5))
         self.ports_dict = self.get_midi_ports()
         
@@ -90,7 +95,6 @@ class MidiPlayerApp:
         else:
             self.port_dropdown.set("Tidak ada perangkat MIDI terdeteksi!")
 
-        # 2. Pilih File
         ttk.Label(main_frame, text="2. Pilih File MIDI (.mid):").pack(anchor="w", pady=(0, 5))
         
         file_frame = tk.Frame(main_frame, bg=self.frame_bg, padx=10, pady=5)
@@ -102,21 +106,19 @@ class MidiPlayerApp:
         btn_browse = ttk.Button(file_frame, text="Browse", command=self.browse_file)
         btn_browse.pack(side="right")
 
-        # 3. Pengaturan (Kecepatan & Volume)
         settings_frame = tk.Frame(main_frame, bg=self.bg_color)
         settings_frame.pack(fill="x", pady=(0, 15))
 
-        ttk.Label(settings_frame, text="Kecepatan (Tempo):").grid(row=0, column=0, sticky="w", pady=5)
+        ttk.Label(settings_frame, text="Kecepatan:").grid(row=0, column=0, sticky="w", pady=5)
         self.speed_var = tk.DoubleVar(value=1.0)
         self.speed_entry = ttk.Spinbox(settings_frame, from_=0.1, to=5.0, increment=0.1, textvariable=self.speed_var, width=8)
         self.speed_entry.grid(row=0, column=1, padx=10)
 
-        ttk.Label(settings_frame, text="Volume (Velocity):").grid(row=0, column=2, sticky="w", padx=(20, 0))
+        ttk.Label(settings_frame, text="Volume:").grid(row=0, column=2, sticky="w", padx=(20, 0))
         self.volume_var = tk.DoubleVar(value=1.0)
         self.volume_entry = ttk.Spinbox(settings_frame, from_=0.1, to=3.0, increment=0.1, textvariable=self.volume_var, width=8)
         self.volume_entry.grid(row=0, column=3, padx=10)
 
-        # 4. Progress Bar & Waktu
         self.progress_var = tk.DoubleVar()
         self.progress_bar = ttk.Progressbar(main_frame, variable=self.progress_var, maximum=100, style="TProgressbar")
         self.progress_bar.pack(fill="x", pady=(15, 5))
@@ -124,7 +126,6 @@ class MidiPlayerApp:
         self.time_label = ttk.Label(main_frame, text="00:00 / 00:00", font=("Consolas", 11))
         self.time_label.pack()
 
-        # 5. Tombol Kontrol (Play, Pause, Stop)
         control_frame = tk.Frame(main_frame, bg=self.bg_color)
         control_frame.pack(pady=20)
 
@@ -144,9 +145,8 @@ class MidiPlayerApp:
         )
         if filepath:
             self.file_path = filepath
-            self.file_label.config(text=os.path.basename(filepath)[:35] + "...") # Potong teks jika terlalu panjang
+            self.file_label.config(text=os.path.basename(filepath)[:35] + "...") 
             
-            # Hitung dan tampilkan total waktu saat file dipilih
             try:
                 mid = mido.MidiFile(self.file_path)
                 total_time = mid.length
@@ -156,7 +156,6 @@ class MidiPlayerApp:
                 pass
 
     def silence_all_notes(self):
-        """Mematikan semua suara di 16 channel"""
         if self.player:
             try:
                 for ch in range(16):
@@ -165,16 +164,27 @@ class MidiPlayerApp:
                 pass
 
     def toggle_pause(self):
-        """Fungsi untuk menjeda dan melanjutkan lagu"""
         if not self.is_playing:
             return
             
         self.is_paused = not self.is_paused
         if self.is_paused:
             self.btn_pause.config(text="▶ Resume")
-            self.silence_all_notes() # Hentikan suara yang sedang bunyi agar tidak nyangkut
+            self.silence_all_notes()
         else:
             self.btn_pause.config(text="⏸ Pause")
+
+    def precise_sleep(self, duration):
+        target_time = time.perf_counter() + duration
+        while True:
+            current_time = time.perf_counter()
+            if current_time >= target_time:
+                break
+            
+            if target_time - current_time > 0.002:
+                time.sleep(0.001) 
+            else:
+                pass 
 
     def start_playback(self):
         if not self.file_path:
@@ -186,7 +196,6 @@ class MidiPlayerApp:
             messagebox.showwarning("Peringatan", "Pilih port MIDI yang valid!")
             return
 
-        # Atur tombol
         self.btn_play.config(state="disabled")
         self.btn_pause.config(state="normal", text="⏸ Pause")
         self.btn_stop.config(state="normal")
@@ -214,39 +223,40 @@ class MidiPlayerApp:
             mid = mido.MidiFile(self.file_path)
             total_time = mid.length
             
-            # Reset UI
             self.root.after(0, lambda: self.progress_bar.config(maximum=total_time))
             self.root.after(0, lambda: self.progress_var.set(0))
             
             current_time = 0.0
+            last_ui_update = 0.0  # Variabel baru untuk mengontrol Frame Rate GUI
 
             for msg in mid:
-                # 1. Cek jika Stop ditekan
                 if not self.is_playing:
                     break
                 
-                # 2. Cek jika Pause ditekan (Loop penahan waktu)
                 while self.is_paused:
                     time.sleep(0.05)
-                    if not self.is_playing: # Jika saat di-pause user menekan Stop
+                    if not self.is_playing: 
                         break
                 
                 if not self.is_playing:
                     break
 
-                # 3. Proses Kecepatan
+                # --- PROSES WAKTU & TIDUR ---
                 speed = self.speed_var.get()
                 time_to_sleep = (msg.time / speed) if speed > 0 else msg.time
                 
                 if time_to_sleep > 0:
-                    time.sleep(time_to_sleep)
+                    self.precise_sleep(time_to_sleep)
                 
-                current_time += msg.time # Tambah waktu aktual lagu berjalan
+                current_time += msg.time 
 
-                # Update UI Waktu & Progress Bar (Gunakan root.after agar aman di Thread)
-                self.root.after(0, self.update_gui_progress, current_time, total_time)
+                # --- OPTIMISASI GUI THROTTLING ---
+                # UI hanya akan di-update setiap 0.1 detik untuk menghemat CPU
+                if current_time - last_ui_update > 0.05:
+                    self.root.after(0, self.update_gui_progress, current_time, total_time)
+                    last_ui_update = current_time
 
-                # 4. Proses Nada & Volume
+                # --- PROSES NADA & VOLUME ---
                 if not msg.is_meta:
                     volume_scale = self.volume_var.get()
                     if msg.type == 'note_on' and msg.velocity > 0:
@@ -261,18 +271,17 @@ class MidiPlayerApp:
                     elif len(raw_bytes) == 1:
                         self.player.write_short(raw_bytes[0])
 
+            # Pastikan progress bar penuh di akhir lagu
+            if self.is_playing:
+                self.root.after(0, self.update_gui_progress, total_time, total_time)
+
         except Exception as e:
-            # 1. Ubah error menjadi teks permanen
-            error_msg = str(e) 
-            
-            # 2. Ikat teks tersebut ke dalam variabel lokal lambda (msg=error_msg)
+            error_msg = str(e)
             self.root.after(0, lambda msg=error_msg: messagebox.showerror("Error", f"Terjadi kesalahan:\n{msg}"))
-            
         finally:
             self.cleanup_playback()
 
     def update_gui_progress(self, current_t, total_t):
-        """Memperbarui teks waktu dan progress bar di GUI"""
         self.progress_var.set(current_t)
         self.time_label.config(text=f"{self.format_time(current_t)} / {self.format_time(total_t)}")
 
@@ -284,12 +293,10 @@ class MidiPlayerApp:
         self.is_playing = False 
         self.silence_all_notes()
 
-        # Kembalikan tampilan GUI ke awal
         self.root.after(0, lambda: self.btn_play.config(state="normal"))
         self.root.after(0, lambda: self.btn_pause.config(state="disabled", text="⏸ Pause"))
         self.root.after(0, lambda: self.btn_stop.config(state="disabled"))
         
-        # Reset progress bar jika lagu selesai/di-stop
         self.root.after(0, lambda: self.progress_var.set(0))
         total_time_str = self.time_label.cget("text").split("/")[-1].strip() if "/" in self.time_label.cget("text") else "00:00"
         self.root.after(0, lambda: self.time_label.config(text=f"00:00 / {total_time_str}"))
