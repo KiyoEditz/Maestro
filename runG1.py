@@ -116,7 +116,7 @@ class MidiPlayerApp:
 
         ttk.Label(settings_frame, text="Volume:").grid(row=0, column=2, sticky="w", padx=(20, 0))
         self.volume_var = tk.DoubleVar(value=1.0)
-        self.volume_entry = ttk.Spinbox(settings_frame, from_=0.1, to=3.0, increment=0.1, textvariable=self.volume_var, width=8)
+        self.volume_entry = ttk.Spinbox(settings_frame, from_=0.1, to=5.0, increment=0.1, textvariable=self.volume_var, width=8)
         self.volume_entry.grid(row=0, column=3, padx=10)
 
         self.progress_var = tk.DoubleVar()
